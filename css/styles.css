@@ -1,0 +1,10 @@
+body {
+    padding: 0;
+    margin: 0;
+  }
+  
+  #geomap {
+    width: 600x;
+    height: 600px;
+  }
+  
