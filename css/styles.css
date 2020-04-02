@@ -3,8 +3,30 @@ body {
     margin: 0;
   }
   
-  #geomap {
+#geomap,
+  #dataGraph {
     width: 600x;
     height: 600px;
   }
   
+.wrapper {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+}
+
+#sidebar {
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 999;
+  background:plum;
+  transition: all 0.3s;
+  padding: 20px
+}
+
+#sidebar.active {
+  margin-left: -250px;
+}

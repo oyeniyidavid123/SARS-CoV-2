@@ -28,11 +28,75 @@
   
 </head>
 <body>
-    <div class="container">
-        <div class="jumbotron">
-          <div class="display-4 col-xs-12 col-md-12 d-flex justify-content-center">
-            <h1 >Thar be the corona</h1>
-          </div>
+  <!-- This is the sidebar -->
+  <div class = 'wrapper col-md-2 col-xs-2'>
+    <nav id = 'sidebar'>
+
+      <div class = 'sidebar-header'>
+        <h3>Bootstrap Sidebar</h3>
+      </div>
+
+      <ul class = 'list-unstyled components'>
+        <p>Heading</p>
+        <li class = 'active'>
+          <a href='#homeSubmenu' data-toggle = 'collapse' aria-expanded = 'false' class = 'dropdown-toggle'>Home</a>
+          <ul class = 'collapse list-unstyled' id = 'homeSubmenu'>
+
+            <li>
+              <a href = '#'>Option 1</a>
+            </li>
+
+            <li>
+              <a href = '#'>Option 2</a>
+            </li>
+
+            <li>
+              <a href = '#'>Option 3</a>
+            </li>
+
+          </ul>
+        </li>
+
+        <li>
+          <a href = '#'>About</a>
+        </li>
+
+        <li>
+          <a href = '#pageSubmenu' data-toggle = 'collapse' aria-expanded = 'false' class = 'dropdown-toggle'>Pages</a>
+          <ul class = 'collapse list-unstyled' id = 'pageSubmenu'>
+
+            <li>
+              <a href = '#'>Option 1</a>
+            </li>
+
+            <li>
+              <a href = '#'>Option 2</a>
+            </li>
+
+            <li>
+              <a href = '#'>Option 3</a>
+            </li>
+
+
+          </ul>
+        </li>
+        
+        <li>
+          <a href = '#'>Data</a>
+        </li>
+
+      </ul>
+
+    </nav>
+  </div>
+
+    <div class="container col-md-10 col-xs-10">
+      
+
+
+      
+        <div class="display-4 col-xs-12 col-md-12 d-flex justify-content-center">
+          <h1 >Thar be the corona</h1>
         </div>
         <div class="container">
           <div class="col-xs-12  col-md-12">
@@ -52,7 +116,7 @@
         <div class="container">
           <div class="col-xs-12  col-md-9">
             <!--Detailed graph goes here-->
-            <div id = "lineGraph">
+            <div id = "dataGraph">
             </div>
           </div>
         </div>
