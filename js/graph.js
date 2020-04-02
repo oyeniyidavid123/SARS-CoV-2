@@ -32,7 +32,7 @@ let chartGroup = svg.append('g')
     .attr('transform', `translate(${chartMargins.left}, ${chartMargins.top})`);
 
 // read csv and draw
-let csvPath = '../data/data.csv';
+let csvPath = '/data/data.csv';
 d3.csv(csvPath).then(csvData => {
     // test to print data
     console.log(csvData);
