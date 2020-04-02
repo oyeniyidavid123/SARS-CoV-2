@@ -15,7 +15,7 @@ let states = [ 'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA',
 //loop to add all state geoJSON data
 states.forEach(state => {
     //set paths 
-    let geoPath = `../data/geoData/countries/USA/${state}.geo.json`;
+    let geoPath = `/data/geoData/countries/USA/${state}.geo.json`;
 
     d3.json(geoPath).then(function(data) {
         console.log(data);
