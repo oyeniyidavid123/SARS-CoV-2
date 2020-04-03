@@ -31,40 +31,60 @@ let svg = d3.select('#dataGraph')
 let chartGroup = svg.append('g')
     .attr('transform', `translate(${chartMargins.left}, ${chartMargins.top})`);
 
+
+    
+
 // read csv and draw
-let csvPath = '/data/data.csv';
+let csvPath = '/project 2 (Quaid) copy/data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
 d3.csv(csvPath).then(csvData => {
     // test to print data
-    console.log(csvData);
 
-    let factorsArray = ['healthcare', 'age', 'income', 'poverty', 'smokes', 'obesity'];
+    // get column names for list of dates
+    let datesArray = csvData.columns.slice(4);
+    console.log(datesArray);
+
+
+    // date parsing function to turn all date strings into dates
+    let parseTime = d3.timeParse("%M/%D/%Y");
+
+    csvData.columns.slice(4).forEach(date => {
+        parseTime(date)
+    });
+
     // nested forEach to convert column values to int
-    csvData.forEach(function(state) {
-        factorsArray.forEach(factor => {
-            state[`${factor}`] = +state[`${factor}`]
+    csvData.forEach(function(country) {
+        datesArray.forEach(date => {
+            country[`${date}`] = +country[`${date}`];
+            
         });
     });
     
     // set x scales for axes
 
-    let XScales = {};
+    let xTimeScale = d3.scaleTime()
+        .domain(d3.extent(csvData.columns.slice(4)))
+        .range([0, chartWidth])
+    // let XScales = {};
 
-    factorsArray.slice(0, 3).forEach(factor => {
-        XScales[`${factor}`] = d3.scaleLinear()
-        .domain([0, d3.max(csvData, d => d[`${factor}`])])
-        .range([0, chartWidth]);
+    // factorsArray.slice(0, 3).forEach(factor => {
+    //     XScales[`${factor}`] = d3.scaleLinear()
+    //     .domain([0, d3.max(csvData, d => d[`${factor}`])])
+    //     .range([0, chartWidth]);
 
-    });
+    // });
 
-    // set y scales for axes
-    let YScales = {};
+    // // set y scales for axes
 
-    factorsArray.slice(3, 7).forEach(factor => {
-        YScales[`${factor}`] = d3.scaleLinear()
-        .domain([0, d3.max(csvData, d => d[`${factor}`])])
-        .range([chartHeight, 0]);
+    let yLinearScale = d3.scaleLinear()
+        .domain([0, d3.max()])
+    // let YScales = {};
 
-    });
+    // factorsArray.slice(3, 7).forEach(factor => {
+    //     YScales[`${factor}`] = d3.scaleLinear()
+    //     .domain([0, d3.max(csvData, d => d[`${factor}`])])
+    //     .range([chartHeight, 0]);
+
+    // });
     
     // create Axes
     
