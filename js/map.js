@@ -18,7 +18,7 @@ states.forEach(state => {
     let geoPath = `/data/geoData/countries/USA/${state}.geo.json`;
 
     d3.json(geoPath).then(function(data) {
-        console.log(data);
+
         L.geoJSON(data, {
             // add styles to each geoJSON 
             style: {fillColor: 'purple', fillOpacity: 0.5},
