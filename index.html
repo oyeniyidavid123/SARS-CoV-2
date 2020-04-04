@@ -2,8 +2,12 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>US COVID-19 Cases</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>US COVID-19 Cases using Startmin - Bootstrap Admin Theme</title>
   
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
   <link rel="stylesheet" href="./css/styles.css">
@@ -16,6 +20,23 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  <!-- Bootstrap Core CSS -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- MetisMenu CSS -->
+  <link href="css/metisMenu.min.css" rel="stylesheet">
+
+  <!-- Timeline CSS -->
+  <link href="css/timeline.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="css/startmin.css" rel="stylesheet">
+
+  <!-- Morris Charts CSS -->
+  <link href="css/morris.css" rel="stylesheet">
+
+  <!-- Custom Fonts -->
+  <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
   
   <!--leaflet script and styles-->
@@ -28,100 +49,125 @@
   
 </head>
 <body>
+  <hr>
   <!-- This is the sidebar -->
-  <div class = 'wrapper col-md-2 col-xs-2'>
-    <nav id = 'sidebar'>
+  <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
 
-      <div class = 'sidebar-header'>
-        <h3>Bootstrap Sidebar</h3>
-      </div>
-
-      <ul class = 'list-unstyled components'>
-        <p>Heading</p>
-        <li class = 'active'>
-          <a href='#homeSubmenu' data-toggle = 'collapse' aria-expanded = 'false' class = 'dropdown-toggle'>Home</a>
-          <ul class = 'collapse list-unstyled' id = 'homeSubmenu'>
-
+          <ul class="nav" id="side-menu">
             <li>
-              <a href = '#'>Option 1</a>
+                <a href="#" class="active"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
             </li>
-
             <li>
-              <a href = '#'>Option 2</a>
+                <a href="#"><i class="fa fa-sitemap fa-fw"></i> Show Charts<span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li> <!-- TOP 10 COUNTRY BAR CHARTS with METATABLE-->
+                        <a href="#">Data Table</a>
+                    </li>
+                    <li> <!-- TOP 10 COUNTRY BAR CHARTS with METATABLE-->
+                      <a href="#">United States Analysis</a>
+                  </li>
+                    <li>
+                        <a href="#">Global Analysis</a>
+                    </li></ul>
             </li>
+        </ul>
+    </div></div></div>
+  <div class="row">
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 
-            <li>
-              <a href = '#'>Option 3</a>
-            </li>
-
+        <div class="container">
+          <ul class="nav navbar-nav navbar-left navbar-top-links">
+            <!-- <li><a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports"><i class="fa fa-home fa-fw"></i> CSSEGISandData Github</a></li> -->
+            <li><a class="navbar-brand">COVID-19 DASHBOARD</a></li>
           </ul>
-        </li>
+        </div>
 
-        <li>
-          <a href = '#'>About</a>
-        </li>
-
-        <li>
-          <a href = '#pageSubmenu' data-toggle = 'collapse' aria-expanded = 'false' class = 'dropdown-toggle'>Pages</a>
-          <ul class = 'collapse list-unstyled' id = 'pageSubmenu'>
-
-            <li>
-              <a href = '#'>Option 1</a>
-            </li>
-
-            <li>
-              <a href = '#'>Option 2</a>
-            </li>
-
-            <li>
-              <a href = '#'>Option 3</a>
-            </li>
-
-
-          </ul>
-        </li>
         
-        <li>
-          <a href = '#'>Data</a>
-        </li>
-
-      </ul>
-
     </nav>
   </div>
 
-    <div class="container col-md-10 col-xs-10">
-      
 
+  <div id="page-wrapper">
 
-      
-        <div class="display-4 col-xs-12 col-md-12 d-flex justify-content-center">
-          <h1 >Thar be the corona</h1>
-        </div>
-        <div class="container">
-          <div class="col-xs-12  col-md-12">
-            
-            <!--Load config.js for api key and map.js for drawing map-->
-            
+      <div class="row">
+          <div class="container-fluid">
+            <div class="col-lg-8">
+                <div class="panel panel-default">
+                          <div class="panel-heading">
+                            <div class="panel-body">
+                              <i class="fa fa-bar-chart-o fa-fw"></i> GeoMap United States
+                  
+                              <div id="geomap"></div>
+                              <!--Map goes in this div-->
+                                <script type="text/javascript" src='./js/config.js'></script>
+                                <script type="text/javascript" src='./js/map.js'></script>
+                            </div>
+                </div></div>
+            </div>
 
-            <!--Map goes in this div-->
-            
-            <div id="geomap"></div>
-            <script type="text/javascript" src='./js/config.js'></script>
-            <script type="text/javascript" src='./js/map.js'></script>
+            <div class="col-lg-4">
+                    <div class="panel panel-default">
+                              <div class="panel-heading">
+                                  <div class="panel-body">
+                                  <i class="fa fa-bar-chart-o fa-fw"></i> GeoMap United States
 
+                                  <div id="geomap"></div>
+
+                      <!--Map goes in this div-->
+
+                              </div></div>
+                    </div>
+            </div>
           </div>
-        </div>
-        
-        <div class="container">
-          <div class="col-xs-12  col-md-9">
-            <!--Detailed graph goes here-->
-            <div id = "dataGraph"></div>
-            <script type='text/javascript' src='./js/graph.js'></script>
-          </div>
-        </div>
-      </div>
     </div>
+
+    
+      
+     
+    
+    <!-- <div class="container-fluid"> -->
+    <div class="row">
+        <div class="container-fluid">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <div class="panel-body">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Bubble Map
+                        
+                  <!--Detailed graph goes here-->
+                          <div id = "dataGraph"></div>
+                          <script type='text/javascript' src='./js/graph.js'></script>
+                  </div></div>
+                </div>
+              </div>
+    </div></div>
+    
+  
+
+    <!-- <div class="container-fluid"> -->
+    <div class="row">
+        <div class="container-fluid">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <div class="panel-body">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Bubble Map
+                        <div id = "dataGraph"></div>
+                        <script type='text/javascript' src='#'></script>
+                      </div>
+                  </div>
+                </div>
+              </div></div>
+    </div>
+    
+
+    
+  
+  
+  
+  </div>
+
 </body>
 
 </html>
