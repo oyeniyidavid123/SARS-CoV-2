@@ -38,17 +38,15 @@ let chartGroup = svg.append('g')
 
 let csvPath = '../data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
 d3.csv(csvPath).then(csvData => {
-    let graphJSON = {};
-    graphJSON['dates'] = [];
     // date parsing function to turn all date strings into dates
+    dateArray = [];
     let parseTime = d3.timeParse("%m/%d/%y");
     csvData.columns.slice(4).forEach(date => {
-        graphJSON['dates'].push(parseTime(date));
-        // also write the dates array to graphJSON for plotting
+        dateArray.push(parseTime(date));
     });
-    console.log(graphJSON['dates'])
 
-    // nested forEach to convert column values to int
+
+    // nested forEach to convert case values to int
     csvData.forEach(function(country) {
         csvData.columns.slice(4).forEach(date => {
             country[`${date}`] = +country[`${date}`];
@@ -61,20 +59,21 @@ d3.csv(csvPath).then(csvData => {
         //if country matches then create array of # of cases 
         if (row['Country/Region'] === 'US') {
             //save array into graphJSON
-            graphJSON['cases'] = (Object.values(row).slice(4));
+            caseJSON = row;
+            caseArray = (Object.values(row).slice(4));
         };
     });
 
     // set x scales for axes
 
     let xTimeScale = d3.scaleTime()
-        .domain(d3.extent(graphJSON.dates))
+        .domain(d3.extent(dateArray))
         .range([0, chartWidth])
 
     // set y scales for axes
 
     let yLinearScale = d3.scaleLinear()
-        .domain([0, d3.max(graphJSON.cases)])
+        .domain([0, d3.max(caseArray)])
         .range([chartHeight, 0])
 
     
@@ -84,12 +83,13 @@ d3.csv(csvPath).then(csvData => {
 
     //configure line function for drawing line
     let drawLine = d3.line()
-        .x(data => xTimeScale(data.dates))
-        .y(data => yLinearScale(data.cases))
+        .x(function(data) {return xTimeScale(data.dates)})
+        .y(function(data) {return yLinearScale(data.cases)})
+        .curve(d3.curveMonotoneX);
 
     // add line as svg path using line function
     chartGroup.append('path')
-        .attr('d', drawLine(graphJSON))
+        .attr('d', drawLine(caseJSON))
         .classed('line', true);
 
     //append the left and bottom axes to svg group
@@ -101,16 +101,6 @@ d3.csv(csvPath).then(csvData => {
     chartGroup.append('g')
         .classed('axis', true)
         .call(leftAxis);
-
-    // // BIG MONEY TIME MAKE THE CIRCLES
-    // let stateCircles = chartGroup.selectAll('.stateCircle')
-    //     .data(zippedData)
-    //     .enter()
-    //     .append('circle')
-    //     .classed('stateCircle', true)
-    //     .attr('cx', d => xTimeScale(Object.))
-    //     .attr('cy', d => YScales['poverty'](d['poverty']))
-    //     .attr('r', '10');
 
     //draw axis labels
     // x axis labels
