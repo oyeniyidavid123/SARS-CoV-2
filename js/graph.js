@@ -38,13 +38,16 @@ let chartGroup = svg.append('g')
 
 let csvPath = '/data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
 d3.csv(csvPath).then(csvData => {
-    // date parsing function to turn all date strings into dates
+    // date parsing function to turn all date strings into dates, and a slider array for slider values
     dateArray = [];
+    sliderArray = [];
     let parseTime = d3.timeParse("%m/%d/%y");
     csvData.columns.slice(4).forEach(date => {
         dateArray.push(parseTime(date));
+        sliderArray.push(date);
     });
-
+    
+    let casesDate = '1/22/20';
     // nested forEach to convert case values to int
     csvData.forEach(function(country) {
         csvData.columns.slice(4).forEach(date => {
@@ -53,21 +56,14 @@ d3.csv(csvPath).then(csvData => {
         });
     });
 
-     // create array of cases for US
+     // create array of countries
+     countryArray = [];
      csvData.forEach(row =>{
         //if country matches then create array of # of cases 
-        if (row['Country/Region'] === 'US') {
-            caseArray = (Object.values(row).slice(4));
-        };
+        countryArray.push(row['Country/Region'])
     });
 
-    // Loop to create data list of objects for data binding
-    let data = [];
-    dateArray.forEach((date, index) => {
-        data.push({'date': date, 'cases': caseArray[index]});
-    });
-    // add the first entry to the end of the array for a complete polygon
-    data.push(data[0]);
+    csvData.push(csvData[0]); // add the first entry to the end to make a complete circle
 
     // Set circle inner and outer radii
     let innerRadius = 100,
@@ -82,24 +78,24 @@ d3.csv(csvPath).then(csvData => {
     circleRadians = 2 * Math.PI;
 
     // set x scales for dates to angles in radians
-    let x = d3.scaleTime()
-        .domain(d3.extent(dateArray))
+    let x = d3.scaleLinear()
+        .domain([0, csvData.length])
         .range([0, circleRadians]);
     
-    // set y scales for scales to radius
+    // set y scales according to the highest number of cases to radius
     let y = d3.scaleRadial()
-        .domain([0, d3.max(caseArray)])
+        .domain([0, d3.max(csvData, data => data[`${casesDate}`])])
         .range([innerRadius, outerRadius]);
     
 
     //configure line function for drawing line
     let drawLine = d3.lineRadial()
-        .angle(function(d) {return x(d.date)})
-        .radius(function(d) {return y(d.cases)});
+        .angle(function(d) {return x(csvData.indexOf(d))})
+        .radius(function(d) {return y(d[`${casesDate}`])});
 
     // add line as svg path using line function
     let radialLine = chartGroup.append('path')
-        .datum(data)
+        .datum(csvData)
         .attr('fill', 'none')
         .attr('stroke', '#4099ff')
         .attr('stroke-width', '3')
@@ -109,26 +105,97 @@ d3.csv(csvPath).then(csvData => {
 
 
     // Let's add tooltips - fun for the whole family
-    // create tooltip and call to svg chart area
-    let toolTip = d3.tip()
-        .attr('class', 'd3-tip')
-        .offset([120,80])
-        .html(function(d) {
-            return (`<p><strong>${d.date}</strong></p>
-            <p>${d.cases}% have healthcare</p>`)
-        });
 
-    radialLine.on('mouseover', function(d){
-        toolTip.show(d, this);
-    })
-    .on('mouseout', function(d){
-        toolTip.hide(d);
+    //bisector function to find circle appearance index
+    let bisectFunction = d3.bisector(function(d) { return csvData.indexOf(d); }).left;
 
-    });
+    // create svg group called focus to draw tooltip box
+    let focus = chartGroup.append("g")
+            .attr("class", "focus")
+            .style("display", "none");
 
-    chartGroup.call(toolTip);
+    // define circle marker properties
+    focus.append("circle")
+        .attr("r", 5)
+        .classed('circle-marker', true)
 
-    function animate(line){
+
+    // define tooltip text box properties
+    focus.append("rect")
+        .attr("class", "tooltip")
+        .attr("width", 100)
+        .attr("height", 50)
+        .attr("x", 10)
+        .attr("y", -22)
+        .attr("rx", 4)
+        .attr("ry", 4);
+
+    // add svg text to tooltip box for country/region
+    focus.append("text")
+        .attr("class", "tooltip-country")
+        .attr("x", 18)
+        .attr("y", -2);
+
+    // add svg text for Province/State
+    focus.append("text")
+        .attr("class", "tooltip-province")
+        .attr("x", 18)
+        .attr("y", 18);
+
+    // add svg text to tooltip box for static cases text
+    focus.append("text")
+        .attr("x", 18)
+        .attr("y", 38)
+        .text("Cases: ");
+
+    // text for dynamic cases text
+    focus.append("text")
+        .attr("class", "tooltip-cases")
+        .attr("x", 60)
+        .attr("y", 38);
+
+    svg.append("rect")
+        .attr("class", "overlay")
+        .attr("width", chartWidth)
+        .attr("height", chartHeight)
+        .on("mouseover", function() { focus.style("display", null); })
+        .on("mouseout", function() { focus.style("display", "none"); })
+        .on("mousemove", mousemove);
+
+    
+
+    function mousemove() {
+        let coords = d3.mouse(this);
+        let adjusted_x = coords[0] - cxCenter - innerRadius, //adjust cartesian coordinates to reference circle center
+            adjusted_y = -1 * (coords[1] - cyCenter - innerRadius);
+
+        angle_in_radians = -(Math.atan2( adjusted_y, adjusted_x) - Math.PI/2); // math do convert cartesian coordinates to radian angle from center
+        angle_in_radians = angle_in_radians > 0 ? angle_in_radians : (2*Math.PI) + angle_in_radians;
+        let r0 = x.invert(angle_in_radians), //use the x d3 scalar with .invert to convert mouse x coordiate to country index
+            i = bisectFunction(csvData, r0, 1),
+            d0 = csvData[i - 1], // array left of cursor
+            d1 = csvData[i], // array of values right of cursor
+            d = r0 - d0 > d1 - r0 ? d1 : d0; //ternary operator to decide which datapoint to show
+        
+        // recalculate from radians to cartesian for where to place tooltip
+        let markerTheta = x(csvData.indexOf(d)),
+            markerRadius = y(d[`${casesDate}`]);
+        
+        let markerXTransform = (markerRadius * Math.cos(markerTheta - Math.PI/2)) + 0.5*cxCenter + innerRadius + 24;
+        let markerYTransform = (markerRadius * Math.sin(markerTheta - Math.PI/2)) + 0.5*cyCenter + innerRadius - 6;
+        
+        console.log(markerXTransform, markerYTransform);
+        focus.attr("transform", `translate(${markerXTransform}, ${markerYTransform})`);
+        focus.select(".tooltip-country").text(d['Country/Region']);
+        focus.select(".tooltip-province").text(d['Province/State']);
+        focus.select(".tooltip-cases").text(d[casesDate]);
+        
+        
+    }
+
+
+
+    function animateDraw(line){
         if(line == 0) {
             //set lines to invisible
             d3.selectAll('line').style('opacity', '0');
@@ -146,7 +213,7 @@ d3.csv(csvPath).then(csvData => {
             .attr('stroke-dashoffset', 0);
     }
 
-    animate(0);
+    animateDraw(0);
 
 
     // // create listener for mouseover to show tooltips
@@ -158,53 +225,6 @@ d3.csv(csvPath).then(csvData => {
 
     // });
 
-    // create .on() listener for clicks on axes
-    // Object.keys(xLabelObject).forEach(key => {
-    //     xLabelObject[`${key}`].on('click', function(){
-
-    //         //move all circle markers
-    //         stateCircles.transition()
-    //         .duration(500)
-    //         .attr('cx', d => XScales[`${key}`](d[`${key}`]));
-
-    //         //move all text labels
-    
-    //         stateLabels.transition()
-    //         .duration(500)
-    //         .attr('x', d => XScales[`${key}`](d[`${key}`]));
-
-    //         // move axes on click
-    //         bottomAxisGroup.transition()
-    //         .duration(500)
-    //         .attr('transform', `translate(${bottomAxisPositions[key]}, 0)`);
-        
-    // });
-
-    // });
-    
-    // create .on() listener for clicks on Y axes
-    // Object.keys(yLabelObject).forEach(key => {
-    //     yLabelObject[`${key}`].on('click', function(){
-
-    //         //move all circle markers
-    //         stateCircles.transition()
-    //         .duration(500)
-    //         .attr('cy', d => YScales[`${key}`](d[`${key}`]));
-
-    //         //move all text labels
-    
-    //         stateLabels.transition()
-    //         .duration(500)
-    //         .attr('y', d => YScales[`${key}`](d[`${key}`]))
-
-    //         // move axes on click
-    //         leftAxisGroup.transition()
-    //         .duration(500)
-    //         .attr('transform', `translate(0, ${leftAxisPositions[key]})`)
-        
-    // });
-
-    // });
 }
     ).catch(function(error) {
         console.log(error);
