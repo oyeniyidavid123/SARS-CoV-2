@@ -36,7 +36,7 @@ let chartGroup = svg.append('g')
 
 // read csv and draw
 
-let csvPath = '../data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
+let csvPath = '/data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
 d3.csv(csvPath).then(csvData => {
     // date parsing function to turn all date strings into dates
     dateArray = [];
@@ -44,7 +44,6 @@ d3.csv(csvPath).then(csvData => {
     csvData.columns.slice(4).forEach(date => {
         dateArray.push(parseTime(date));
     });
-
 
     // nested forEach to convert case values to int
     csvData.forEach(function(country) {
@@ -58,101 +57,91 @@ d3.csv(csvPath).then(csvData => {
      csvData.forEach(row =>{
         //if country matches then create array of # of cases 
         if (row['Country/Region'] === 'US') {
-            //save array into graphJSON
-            caseJSON = row;
             caseArray = (Object.values(row).slice(4));
         };
     });
 
-    // set x scales for axes
+    // Loop to create data list of objects for data binding
+    let data = [];
+    dateArray.forEach((date, index) => {
+        data.push({'date': date, 'cases': caseArray[index]});
+    });
+    // add the first entry to the end of the array for a complete polygon
+    data.push(data[0]);
 
-    let xTimeScale = d3.scaleTime()
+    // Set circle inner and outer radii
+    let innerRadius = 100,
+        outerRadius = d3.min([chartWidth, chartHeight])/2; // outer radius is scaled to the size of the height or 
+        //width of the svg, whichever is smaller
+
+    //set circle centers
+    let cxCenter = `${chartWidth/2 - 150}`,
+     cyCenter = `${chartWidth/2 - 210}`;
+
+    // set other circle values
+    circleRadians = 2 * Math.PI;
+
+    // set x scales for dates to angles in radians
+    let x = d3.scaleTime()
         .domain(d3.extent(dateArray))
-        .range([0, chartWidth])
-
-    // set y scales for axes
-
-    let yLinearScale = d3.scaleLinear()
-        .domain([0, d3.max(caseArray)])
-        .range([chartHeight, 0])
-
+        .range([0, circleRadians]);
     
-    // create Axes
-    let bottomAxis = d3.axisBottom(xTimeScale);
-    let leftAxis = d3.axisLeft(yLinearScale);
+    // set y scales for scales to radius
+    let y = d3.scaleRadial()
+        .domain([0, d3.max(caseArray)])
+        .range([innerRadius, outerRadius]);
+    
 
     //configure line function for drawing line
-    let drawLine = d3.line()
-        .x(function(data) {return xTimeScale(data.dates)})
-        .y(function(data) {return yLinearScale(data.cases)})
-        .curve(d3.curveMonotoneX);
+    let drawLine = d3.lineRadial()
+        .angle(function(d) {return x(d.date)})
+        .radius(function(d) {return y(d.cases)});
 
     // add line as svg path using line function
-    chartGroup.append('path')
-        .attr('d', drawLine(caseJSON))
-        .classed('line', true);
+    let radialLine = chartGroup.append('path')
+        .datum(data)
+        .attr('fill', 'none')
+        .attr('stroke', '#4099ff')
+        .attr('d', drawLine)
+        .attr('id', 'dataLine')
+        .attr('transform', `translate(${cxCenter}, ${cyCenter})`);
 
-    //append the left and bottom axes to svg group
-    chartGroup.append('g')
-        .classed('axis', true)
-        .attr('transform', `translate(0, ${chartHeight})`)
-        .call(bottomAxis);
-
-    chartGroup.append('g')
-        .classed('axis', true)
-        .call(leftAxis);
-
-    //draw axis labels
-    // x axis labels
-    // let xLabelObject = {};
-
-    // xLabelObject['healthcare'] = chartGroup.append('text')
-    //     .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 50})`)
-    //     .classed('active', true)
-    //     .text('% of Households with Healthcare');
-    
-    // xLabelObject['age'] = chartGroup.append('text')
-    //     .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 30})`)
-    //     .classed('inactive', true)
-    //     .text('Average Household Age');
-
-    // xLabelObject['income'] = chartGroup.append('text')
-    //     .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 10})`)
-    //     .classed('inactive', true)
-    //     .text('Average Household Income');
-
-    // y axis labels
-
-    // let yLabelObject = {};
-    // yLabelObject['obesity'] = chartGroup.append('text')
-    //     .attr('transform', `translate(${chartMargins.left - 140}, ${chartHeight/2}) rotate(-90)`)
-    //     .classed('active', true)
-    //     .text('% of Households with an Obese Adult');
-
-    // yLabelObject['poverty'] = chartGroup.append('text')
-    //     .attr('transform', `translate(${chartMargins.left - 160}, ${chartHeight/2}) rotate(-90)`)
-    //     .classed('inactive', true)
-    //     .text('% of Households in Poverty');
-
-    // yLabelObject['smokes'] = chartGroup.append('text')
-    //     .attr('transform', `translate(${chartMargins.left - 180}, ${chartHeight/2}) rotate(-90)`)
-    //     .classed('inactive', true)
-    //     .text('% of Households with Smokers');
 
     // Let's add tooltips - fun for the whole family
     // create tooltip and call to svg chart area
-    // let toolTip = d3.tip()
-    //     .attr('class', 'd3-tip')
-    //     .offset([120,80])
-    //     .html(function(d) {
-    //         return (`<p><strong>${d.state}</strong></p>
-    //         <p>${d.healthcare}% have healthcare</p>
-    //         <p>${d.poverty}% in poverty</p>`);
-    //     });
+    let toolTip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([120,80])
+        .html(function(d) {
+            return (`<p><strong>${d.state}</strong></p>
+            <p>${d.healthcare}% have healthcare</p>
+            <p>${d.poverty}% in poverty</p>`);
+        });
 
-    // chartGroup.call(toolTip);
+    chartGroup.call(toolTip);
 
-    // create listener for mouseover to show tooltips
+    function animate(line){
+        if(line == 0) {
+            //set lines to invisible
+            d3.selectAll('line').style('opacity', '0');
+        }
+
+        let lineLength = d3.select('#dataLine').node().getTotalLength();
+        d3.selectAll('#dataLine')
+            //set line to double length, with half being an empty dash
+            .attr('stroke-dasharray', lineLength + " " + lineLength)
+            // set initial empty dash to be the visible part
+            .attr('stroke-dashoffset', lineLength)
+            .transition()
+            .duration(1000)
+            .easeCubicOut()
+            .attr('stroke-dashoffset', 0);
+    }
+
+    animate(0);
+
+
+    // // create listener for mouseover to show tooltips
     // stateLabels.on('mouseover', function(d){
     //     toolTip.show(d, this);
     // })
