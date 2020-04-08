@@ -102,6 +102,7 @@ d3.csv(csvPath).then(csvData => {
         .datum(data)
         .attr('fill', 'none')
         .attr('stroke', '#4099ff')
+        .attr('stroke-width', '3')
         .attr('d', drawLine)
         .attr('id', 'dataLine')
         .attr('transform', `translate(${cxCenter}, ${cyCenter})`);
@@ -113,10 +114,17 @@ d3.csv(csvPath).then(csvData => {
         .attr('class', 'd3-tip')
         .offset([120,80])
         .html(function(d) {
-            return (`<p><strong>${d.state}</strong></p>
-            <p>${d.healthcare}% have healthcare</p>
-            <p>${d.poverty}% in poverty</p>`);
+            return (`<p><strong>${d.date}</strong></p>
+            <p>${d.cases}% have healthcare</p>`)
         });
+
+    radialLine.on('mouseover', function(d){
+        toolTip.show(d, this);
+    })
+    .on('mouseout', function(d){
+        toolTip.hide(d);
+
+    });
 
     chartGroup.call(toolTip);
 
@@ -134,7 +142,7 @@ d3.csv(csvPath).then(csvData => {
             .attr('stroke-dashoffset', lineLength)
             .transition()
             .duration(1000)
-            .easeCubicOut()
+            .ease(d3.easeExp)
             .attr('stroke-dashoffset', 0);
     }
 
