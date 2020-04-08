@@ -31,9 +31,6 @@ let svg = d3.select('#dataGraph')
 let chartGroup = svg.append('g')
     .attr('transform', `translate(${chartMargins.left}, ${chartMargins.top})`);
 
-
-    
-
 // read csv and draw
 
 let csvPath = '/data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
@@ -43,11 +40,11 @@ d3.csv(csvPath).then(csvData => {
     sliderArray = [];
     let parseTime = d3.timeParse("%m/%d/%y");
     csvData.columns.slice(4).forEach(date => {
-        dateArray.push(parseTime(date));
+        dateArray.push(date);
         sliderArray.push(date);
     });
     
-    let casesDate = '1/22/20';
+    casesDate = '1/22/20';
     // nested forEach to convert case values to int
     csvData.forEach(function(country) {
         csvData.columns.slice(4).forEach(date => {
@@ -55,10 +52,9 @@ d3.csv(csvPath).then(csvData => {
             
         });
     });
-
-     // create array of countries
-     countryArray = [];
-     csvData.forEach(row =>{
+    // create array of countries
+    countryArray = [];
+    csvData.forEach(row =>{
         //if country matches then create array of # of cases 
         countryArray.push(row['Country/Region'])
     });
@@ -72,7 +68,7 @@ d3.csv(csvPath).then(csvData => {
 
     //set circle centers
     let cxCenter = `${chartWidth/2 - 150}`,
-     cyCenter = `${chartWidth/2 - 210}`;
+    cyCenter = `${chartWidth/2 - 210}`;
 
     // set other circle values
     circleRadians = 2 * Math.PI;
@@ -86,7 +82,6 @@ d3.csv(csvPath).then(csvData => {
     let y = d3.scaleRadial()
         .domain([0, d3.max(csvData, data => data[`${casesDate}`])])
         .range([innerRadius, outerRadius]);
-    
 
     //configure line function for drawing line
     let drawLine = d3.lineRadial()
@@ -103,9 +98,20 @@ d3.csv(csvPath).then(csvData => {
         .attr('id', 'dataLine')
         .attr('transform', `translate(${cxCenter}, ${cyCenter})`);
 
+    // add center text to display date
+    let dateDisplay = chartGroup.append('text')
+        .text(`${casesDate}`)
+        .attr('text-anchor', 'middle')
+        .attr('alignment-baseline', 'central')
+        .attr('font-size', '20')
+        .attr('font-family', 'Verdana')
+        .attr('transform', `translate(${cxCenter}, ${cyCenter})`)
+    
 
-    // Let's add tooltips - fun for the whole family
+    //listener for changing stuff based on selection
+    
 
+    // Let's add tooltip creating function - fun for the whole family
     //bisector function to find circle appearance index
     let bisectFunction = d3.bisector(function(d) { return csvData.indexOf(d); }).left;
 
@@ -118,7 +124,6 @@ d3.csv(csvPath).then(csvData => {
     focus.append("circle")
         .attr("r", 5)
         .classed('circle-marker', true)
-
 
     // define tooltip text box properties
     focus.append("rect")
@@ -151,10 +156,11 @@ d3.csv(csvPath).then(csvData => {
     // text for dynamic cases text
     focus.append("text")
         .attr("class", "tooltip-cases")
-        .attr("x", 60)
+        .attr("x", 65)
         .attr("y", 38);
 
     svg.append("rect")
+        .attr('id', 'toolTipHandler')
         .attr("class", "overlay")
         .attr("width", chartWidth)
         .attr("height", chartHeight)
@@ -162,8 +168,7 @@ d3.csv(csvPath).then(csvData => {
         .on("mouseout", function() { focus.style("display", "none"); })
         .on("mousemove", mousemove);
 
-    
-
+    // handler function for moving tooltip with mouse    
     function mousemove() {
         let coords = d3.mouse(this);
         let adjusted_x = coords[0] - cxCenter - innerRadius, //adjust cartesian coordinates to reference circle center
@@ -175,55 +180,100 @@ d3.csv(csvPath).then(csvData => {
             i = bisectFunction(csvData, r0, 1),
             d0 = csvData[i - 1], // array left of cursor
             d1 = csvData[i], // array of values right of cursor
-            d = r0 - d0 > d1 - r0 ? d1 : d0; //ternary operator to decide which datapoint to show
+            d = r0 - d0 > d1 - r0 ? d1 : d0; //ternary operator to decide which data point to show
         
         // recalculate from radians to cartesian for where to place tooltip
         let markerTheta = x(csvData.indexOf(d)),
             markerRadius = y(d[`${casesDate}`]);
-        
         let markerXTransform = (markerRadius * Math.cos(markerTheta - Math.PI/2)) + 0.5*cxCenter + innerRadius + 24;
         let markerYTransform = (markerRadius * Math.sin(markerTheta - Math.PI/2)) + 0.5*cyCenter + innerRadius - 6;
         
+        //adjust the tooltip according to the mouse pointer position
         console.log(markerXTransform, markerYTransform);
         focus.attr("transform", `translate(${markerXTransform}, ${markerYTransform})`);
         focus.select(".tooltip-country").text(d['Country/Region']);
         focus.select(".tooltip-province").text(d['Province/State']);
-        focus.select(".tooltip-cases").text(d[casesDate]);
-        
-        
+        focus.select(".tooltip-cases").text(d[casesDate]);   
     }
 
 
 
-    function animateDraw(line){
-        if(line == 0) {
-            //set lines to invisible
-            d3.selectAll('line').style('opacity', '0');
-        }
-
-        let lineLength = d3.select('#dataLine').node().getTotalLength();
-        d3.selectAll('#dataLine')
-            //set line to double length, with half being an empty dash
-            .attr('stroke-dasharray', lineLength + " " + lineLength)
-            // set initial empty dash to be the visible part
-            .attr('stroke-dashoffset', lineLength)
-            .transition()
-            .duration(1000)
-            .ease(d3.easeExp)
-            .attr('stroke-dashoffset', 0);
-    }
-
-    animateDraw(0);
 
 
-    // // create listener for mouseover to show tooltips
-    // stateLabels.on('mouseover', function(d){
-    //     toolTip.show(d, this);
-    // })
-    // .on('mouseout', function(d){
-    //     toolTip.hide(d);
 
-    // });
+
+
+
+
+    //add selector for date
+    let dateDropdown = d3.select('#dataGraphDiv')
+        .insert("div",":first-child").classed('dropdown', true)
+            .attr('position', 'absolute')
+            .attr('top', '80px')
+        .append('button').classed('btn btn-secondary dropdown-toggle', true)
+            .attr('id', 'dropdownDateDisplay')
+            .attr('type', 'button')
+            .attr('data-toggle', 'dropdown')
+            .attr('aria-haspopup', 'true')
+            .attr('aria-expanded', 'false')
+        .text(`${casesDate}`)
+        .append('div').classed('dropdown-menu', true).attr('aria-labelledby', 'dropdownMenuButton');
+
+ 
+    //loop to add all the dates 
+    dateArray.forEach(date => {
+        let dateSelection = dateDropdown.append('a')
+            .classed('dropdown-item', true)
+            .attr('id', `casesDate${date}`)
+            .attr('value', `${date}`)
+            .attr('href', '#')
+            .text(date);
+
+        //listener to update based on date selection
+        dateSelection.on('click', function(){
+            console.log(date)
+            casesDate = date; //update casesDate
+            dateDisplay.text(`${date}`) //update the date displayed in the center
+
+
+            d3.select('#dropdownDateDisplay').text(`${date}`) //update the date displayed on the dropdown
+            //update yscale to fit greater data
+            let y = d3.scaleRadial()
+                .domain([0, d3.max(csvData, data => data[`${casesDate}`])])
+                .range([innerRadius, outerRadius]);
+            //reconfigure line drawing function
+            let drawLine = d3.lineRadial()
+                .angle(function(d) {return x(csvData.indexOf(d))})
+                .radius(function(d) {return y(d[`${casesDate}`])});
+            //redraw line
+            radialLine
+                .transition()
+                .duration(500)
+                .ease(d3.easeExp)
+                .attr('d', drawLine);
+            // update tooltips
+            d3.select('#toolTipHandler')
+            .on("mousemove", mousemove);
+        });
+    });
+    // function animateDraw(line){
+    //     if(line == 0) {
+    //         //set lines to invisible
+    //         d3.selectAll('line').style('opacity', '0');
+    //     }
+
+    //     let lineLength = d3.select('#dataLine').node().getTotalLength();
+    //     d3.selectAll('#dataLine')
+    //         //set line to double length, with half being an empty dash
+    //         .attr('stroke-dasharray', lineLength + " " + lineLength)
+    //         // set initial empty dash to be the visible part
+    //         .attr('stroke-dashoffset', lineLength)
+    //         .transition()
+    //         .duration(1000)
+    //         .ease(d3.easeExp)
+    //         .attr('stroke-dashoffset', 0);
+    // }
+    // animateDraw(0); //draw the circle upon page load
 
 }
     ).catch(function(error) {
