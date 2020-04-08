@@ -3,8 +3,7 @@ function markerSize(cases) {
 }
 
 
-
-
+map.off();
 
 let countryMarker = [];
 
@@ -19,6 +18,7 @@ for (var i = 0; i < mapData.length; i++) {
       color: "yellow",
       fillColor: "yellow",
       radius: markerSize(mapData[i].Confirmed)
+
     }).bindPopup("<h1>" + mapData[i].Country_Region + "</h1> <hr> <h3>Confirmed: " + mapData[i].Confirmed + "<hr> <h3>Deaths: " + mapData[i].Deaths + "</h3>")
   );
 
@@ -72,7 +72,7 @@ for (var i = 0; i <countyData.length; i++) {
       color: "yellow", 
       fillColor: "yellow",
       radius: (countyData[i].Confirmed * 15)
-    })
+    }).bindPopup("<h1>" + countyData[i].State + "</h1> <hr> <h3>Confirmed: " + countyData[i].Confirmed + "<hr> <h3>Deaths: " + countyData[i].Deaths + "</h3>")
   );
 
   countyMarker.push(
@@ -91,12 +91,12 @@ for (var i = 0; i <countyData.length; i++) {
 
 //adding tile layers
 
-let streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-  attribution: "Map data &copy; <a href='https://www.openstreetmap.org/'>OpenStreetMap</a> contributors, <a href='https://creativecommons.org/licenses/by-sa/2.0/'>CC-BY-SA</a>, Imagery © <a href='https://www.mapbox.com/'>Mapbox</a>",
-  maxZoom: 18,
-  id: "mapbox.streets",
-  accessToken: API_KEY
-});
+// let streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+//   attribution: "Map data &copy; <a href='https://www.openstreetmap.org/'>OpenStreetMap</a> contributors, <a href='https://creativecommons.org/licenses/by-sa/2.0/'>CC-BY-SA</a>, Imagery © <a href='https://www.mapbox.com/'>Mapbox</a>",
+//   maxZoom: 18,
+//   id: "mapbox.streets",
+//   accessToken: API_KEY
+// });
 
 let darkmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
   attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
@@ -113,7 +113,7 @@ let stateLayer = L.layerGroup(stateMarker);
 
 
 let baseMaps = {
-  "Street Map": streetmap,
+  // "Street Map": streetmap,
   "Dark Map": darkmap
 };
 
@@ -126,12 +126,12 @@ let overlayMaps = {
 
 //adding layers and tiles to map
 
-const map = L.map("geomap", {
+let map_circle = L.map("myMap", {
   center: [
     37.09, -95.71
   ],
   zoom: 5,
-  layers: [streetmap, countryLayer, stateLayer, countyLayer]
+  layers: [darkmap, countryLayer]
 });
 
-L.control.layers(baseMaps, overlayMaps).addTo(map);
+L.control.layers(baseMaps, overlayMaps).addTo(map_circle);
