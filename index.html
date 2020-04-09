@@ -151,8 +151,12 @@
             <div class="col-lg-12">
                 <div class="panel panel-default">
                   <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i>Coronavirus Cases, Deaths, and Recoveries
                       <div class="panel-body" id='dataGraphDiv'>
-                        <i class="fa fa-bar-chart-o fa-fw"></i> More Chart - Here
+                        <button type="button" class="btn btn-warning" id='cases-CSV-Button' data-toggle='button'>Cases</button>
+                        <button type="button" class="btn btn-danger" id='deaths-CSV-Button' data-toggle='button'>Deaths</button>
+                        <button type="button" class="btn btn-success" id='recovered-CSV-Button' data-toggle='button'>Recovered</button>
+                        
                         <div id="dataGraph">
                             <script type="text/javascript" src='/js/graph.js'></script>
                       </div>

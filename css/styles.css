@@ -107,7 +107,7 @@ body {
 }
 
 .focus circle {
-  fill: purple;
+  fill: black;
 }
 
 .focus text {
@@ -119,9 +119,12 @@ body {
   stroke: #000;
 }
 
-.tooltip-date, .tooltip-likes {
-  font-weight: bold;
+.overlay {
+  fill: none;
+  pointer-events: all;
 }
+
+
 
 /* scroll bar */
 .scrollable{
@@ -133,3 +136,5 @@ body {
 .scrollable select{
   border: none;
 }
+
+
