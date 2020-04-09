@@ -72,7 +72,7 @@ for (var i = 0; i <countyData.length; i++) {
       color: "yellow", 
       fillColor: "yellow",
       radius: (countyData[i].Confirmed * 15)
-    })
+    }).bindPopup("<h1>" + countyData[i].Combined_Key + "</h1> <hr> <h3>Confirmed: " + countyData[i].Confirmed + "<hr> <h3>Deaths: " + countyData[i].Deaths + "</h3>")
   );
 
   countyMarker.push(
@@ -131,7 +131,7 @@ const map = L.map("geomap", {
     37.09, -95.71
   ],
   zoom: 5,
-  layers: [streetmap, countryLayer, stateLayer, countyLayer]
+  layers: [darkmap, countryLayer]
 });
 
 L.control.layers(baseMaps, overlayMaps).addTo(map);
