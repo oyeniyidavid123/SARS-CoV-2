@@ -3,35 +3,12 @@ body {
     margin: 0;
   }
   
-#geomap,
-  #dataGraph {
+#geomap{
     width: 600x;
     height: 600px;
+    font-size: 12px;
   }
   
-/* .wrapper {
-  display: flex;
-  width: 100%;
-  align-items: stretch;
-} */
-/* 
-#sidebar {
-  width: 250px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  z-index: 999;
-  background:plum;
-  transition: all 0.3s;
-  padding: 20px
-}
-
-#sidebar.active {
-  margin-left: -250px;
-} */
-
-/* These are the diagram stats */
 
 .active {
   font-weight: bold;
@@ -83,7 +60,29 @@ body {
   border-radius: 4px;
 }
 
-/* tooltip stuff */
+#globalMap {
+    position: relative;
+    min-width: 600px;
+    min-height: 600px;
+    font-size: 10px;
+  }
+
+#dataGraph {
+    width: 600x;
+    height: 600px;
+  }
+/* scroll bar */
+  .scrollable{
+    overflow: auto;
+    width: 200px; /* adjust this width depending to amount of text to display */
+    height: 400px; /* adjust height depending on number of options to display */
+    border: 1px silver solid;
+  }
+  .scrollable select{
+    border: none;
+  }
+
+  /* tooltip stuff */
 .focus circle {
   fill: steelblue;
 }
@@ -123,18 +122,4 @@ body {
   fill: none;
   pointer-events: all;
 }
-
-
-
-/* scroll bar */
-.scrollable{
-  overflow: auto;
-  width: 200px; /* adjust this width depending to amount of text to display */
-  height: 400px; /* adjust height depending on number of options to display */
-  border: 1px silver solid;
-}
-.scrollable select{
-  border: none;
-}
-
 

@@ -1,11 +1,14 @@
-let myMap = L.map("map").setView([39.8283, -98.5795], 5);
+
+
+
+let countyMap = L.map("countymap").setView([39.8283, -98.5795], 3);
 
 L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
   attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
   maxZoom: 18,
   id: "mapbox.streets",
-  accessToken: API_KEY
-}).addTo(myMap);
+  accessToken: API_key
+}).addTo(countyMap);
 
 let county = [ 'akCounties', 'alCounties', 'arCounties', 'azCounties', 'caCounties', 'coCounties', 'ctCounties', 'dcCounties', 'deCounties', 'flCounties', 'gaCounties', 'hiCounties',
 'iaCounties', 'idCounties', 'ilCounties', 'inCounties', 'ksCounties', 'kyCounties', 'laCounties', 'maCounties', 'mdCounties', 'meCounties',
@@ -47,6 +50,6 @@ county.forEach(county => {
                   },
               })
           },
-        }).addTo(myMap);
+        }).addTo(countyMap);
     });
 });
