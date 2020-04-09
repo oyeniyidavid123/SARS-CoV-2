@@ -34,6 +34,14 @@ let chartGroup = svg.append('g')
 // read csv and draw
 
 let csvPath = '/data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
+
+
+
+
+
+
+
+
 d3.csv(csvPath).then(csvData => {
     // date parsing function to turn all date strings into dates, and a slider array for slider values
     dateArray = [];
@@ -63,7 +71,7 @@ d3.csv(csvPath).then(csvData => {
 
     // Set circle inner and outer radii
     let innerRadius = 100,
-        outerRadius = d3.min([chartWidth, chartHeight])/2; // outer radius is scaled to the size of the height or 
+        outerRadius = d3.min([chartWidth, chartHeight])/1.5; // outer radius is scaled to the size of the height or 
         //width of the svg, whichever is smaller
 
     //set circle centers
@@ -80,7 +88,7 @@ d3.csv(csvPath).then(csvData => {
     
     // set y scales according to the highest number of cases to radius
     let y = d3.scaleRadial()
-        .domain([0, d3.max(csvData, data => data[`${casesDate}`])])
+        .domain([0, d3.max(csvData, data => data['3/27/20'])])
         .range([innerRadius, outerRadius]);
 
     //configure line function for drawing line
@@ -103,13 +111,10 @@ d3.csv(csvPath).then(csvData => {
         .text(`${casesDate}`)
         .attr('text-anchor', 'middle')
         .attr('alignment-baseline', 'central')
-        .attr('font-size', '20')
+        .attr('font-size', '30')
         .attr('font-family', 'Verdana')
         .attr('transform', `translate(${cxCenter}, ${cyCenter})`)
-    
 
-    //listener for changing stuff based on selection
-    
 
     // Let's add tooltip creating function - fun for the whole family
     //bisector function to find circle appearance index
@@ -199,29 +204,24 @@ d3.csv(csvPath).then(csvData => {
 
 
 
-
-
-
-
-
-
     //add selector for date
     let dateDropdown = d3.select('#dataGraphDiv')
         .insert("div",":first-child").classed('dropdown', true)
             .attr('position', 'absolute')
             .attr('top', '80px')
-        .append('button').classed('btn btn-secondary dropdown-toggle', true)
+        .append('button').classed('btn btn-primary dropdown-toggle', true)
             .attr('id', 'dropdownDateDisplay')
             .attr('type', 'button')
             .attr('data-toggle', 'dropdown')
             .attr('aria-haspopup', 'true')
             .attr('aria-expanded', 'false')
         .text(`${casesDate}`)
-        .append('div').classed('dropdown-menu', true).attr('aria-labelledby', 'dropdownMenuButton');
+        .append('div').classed('dropdown-menu scrollable', true).attr('aria-labelledby', 'dropdownMenuButton');
 
  
     //loop to add all the dates 
     dateArray.forEach(date => {
+        let transitionDuration = 1000;
         let dateSelection = dateDropdown.append('a')
             .classed('dropdown-item', true)
             .attr('id', `casesDate${date}`)
@@ -233,14 +233,18 @@ d3.csv(csvPath).then(csvData => {
         dateSelection.on('click', function(){
             console.log(date)
             casesDate = date; //update casesDate
-            dateDisplay.text(`${date}`) //update the date displayed in the center
-
-
-            d3.select('#dropdownDateDisplay').text(`${date}`) //update the date displayed on the dropdown
-            //update yscale to fit greater data
-            let y = d3.scaleRadial()
-                .domain([0, d3.max(csvData, data => data[`${casesDate}`])])
-                .range([innerRadius, outerRadius]);
+            //update the date displayed in the center
+            dateDisplay.transition()
+                .duration(transitionDuration/4)
+                .attr('opacity', 0)
+                .transition()
+                .text(`${date}`) 
+                .transition()
+                .duration(transitionDuration/4)
+                .attr('opacity', 1)
+                
+            // d3.select('#dropdownDateDisplay').text(`${date}`) //update the date displayed on the dropdown
+           
             //reconfigure line drawing function
             let drawLine = d3.lineRadial()
                 .angle(function(d) {return x(csvData.indexOf(d))})
@@ -248,7 +252,7 @@ d3.csv(csvPath).then(csvData => {
             //redraw line
             radialLine
                 .transition()
-                .duration(500)
+                .duration(transitionDuration)
                 .ease(d3.easeExp)
                 .attr('d', drawLine);
             // update tooltips
@@ -256,30 +260,28 @@ d3.csv(csvPath).then(csvData => {
             .on("mousemove", mousemove);
         });
     });
-    // function animateDraw(line){
-    //     if(line == 0) {
-    //         //set lines to invisible
-    //         d3.selectAll('line').style('opacity', '0');
-    //     }
 
-    //     let lineLength = d3.select('#dataLine').node().getTotalLength();
-    //     d3.selectAll('#dataLine')
-    //         //set line to double length, with half being an empty dash
-    //         .attr('stroke-dasharray', lineLength + " " + lineLength)
-    //         // set initial empty dash to be the visible part
-    //         .attr('stroke-dashoffset', lineLength)
-    //         .transition()
-    //         .duration(1000)
-    //         .ease(d3.easeExp)
-    //         .attr('stroke-dashoffset', 0);
-    // }
-    // animateDraw(0); //draw the circle upon page load
+    function animateDraw(){
+        let lineLength = radialLine.node().getTotalLength();
+        radialLine
+            .attr('stroke-dasharray', lineLength + " " + lineLength) //set line to double length, with half being an empty dash
+            .transition().duration(800).ease(d3.easeExp)
+            .attr('stroke-dashoffset', lineLength) // set initial empty dash to be the visible part
+            .transition().duration(800).ease(d3.easeExp)
+            .attr('stroke-dashoffset', 0)
+            .transition()
+            .attr('stroke-dasharray', 'none');
+    }
+    animateDraw(); //draw the circle upon page load
 
 }
     ).catch(function(error) {
         console.log(error);
     });
     
+
+
+
 // makeResponsive();
 // d3.select(window).on("resize", makeResponsive);
 
