@@ -38,8 +38,11 @@ states.forEach(state => {
                         layer.setStyle({
                             fillOpacity: 0.5
                         });
-                    }
+                    },
 
+                    click: function(event) {
+                        map.fitBounds(event.target.getBounds());
+                    }
                 })
             }
         }).addTo(map);

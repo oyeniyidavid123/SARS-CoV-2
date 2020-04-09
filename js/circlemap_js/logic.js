@@ -13,7 +13,7 @@ let countryMarker = [];
 
 for (var i = 0; i < mapData.length; i++) {
   countryMarker.push(
-    L.circle([mapData[i].Lat, mapData[i].Long_], {
+    L.circle([mapData[i].lat, mapData[i].long], {
       stroke: false,
       fillOpacity: 0.75,
       color: "yellow",
@@ -24,7 +24,7 @@ for (var i = 0; i < mapData.length; i++) {
 
 
   countryMarker.push(
-    L.circle([mapData[i].Lat, mapData[i].Long_], {
+    L.circle([mapData[i].lat, mapData[i].long], {
       stroke: false,
       fillOpacity: 0.75,
       color: "red",
