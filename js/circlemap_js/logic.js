@@ -1,5 +1,5 @@
 function markerSize(cases) {
-  return cases * 15;
+  return cases * 3;
 }
 
 
@@ -13,7 +13,7 @@ let countryMarker = [];
 
 for (var i = 0; i < mapData.length; i++) {
   countryMarker.push(
-    L.circle([mapData[i].lat, mapData[i].long], {
+    L.circle([mapData[i].Lat, mapData[i].Long_], {
       stroke: false,
       fillOpacity: 0.75,
       color: "yellow",
@@ -24,7 +24,7 @@ for (var i = 0; i < mapData.length; i++) {
 
 
   countryMarker.push(
-    L.circle([mapData[i].lat, mapData[i].long], {
+    L.circle([mapData[i].Lat, mapData[i].Long_], {
       stroke: false,
       fillOpacity: 0.75,
       color: "red",
@@ -46,7 +46,7 @@ for (var i = 0; i <stateData.length; i++) {
       fillOpacity: 0.75,
       color: "yellow", 
       fillColor: "yellow",
-      radius: (stateData[i].Confirmed * 15)
+      radius: (stateData[i].Confirmed * 3)
     }).bindPopup("<h1>" + stateData[i].State + "</h1> <hr> <h3>Confirmed: " + stateData[i].Confirmed + "<hr> <h3>Deaths: " + stateData[i].Deaths + "</h3>")
   );
 
@@ -56,7 +56,7 @@ for (var i = 0; i <stateData.length; i++) {
       fillOpacity: 0.75,
       color: "red", 
       fillColor: "red",
-      radius: (stateData[i].Deaths * 15)
+      radius: (stateData[i].Deaths * 3)
     })
   );
 }
@@ -71,8 +71,8 @@ for (var i = 0; i <countyData.length; i++) {
       fillOpacity: 0.75,
       color: "yellow", 
       fillColor: "yellow",
-      radius: (countyData[i].Confirmed * 15)
-    })
+      radius: (countyData[i].Confirmed * 5)
+    }).bindPopup("<h1>" + countyData[i].Combined_Key + "</h1> <hr> <h3>Confirmed: " + countyData[i].Confirmed + "<hr> <h3>Deaths: " + countyData[i].Deaths + "</h3>")
   );
 
   countyMarker.push(
@@ -81,7 +81,7 @@ for (var i = 0; i <countyData.length; i++) {
       fillOpacity: 0.75,
       color: "red", 
       fillColor: "red",
-      radius: (countyData[i].Deaths * 15)
+      radius: (countyData[i].Deaths * 5)
     })
   );
 }
@@ -126,12 +126,12 @@ let overlayMaps = {
 
 //adding layers and tiles to map
 
-const map = L.map("geomap", {
+const map = L.map("globalMap", {
   center: [
     37.09, -95.71
   ],
   zoom: 5,
-  layers: [streetmap, countryLayer, stateLayer, countyLayer]
+  layers: [darkmap, countryLayer]
 });
 
 L.control.layers(baseMaps, overlayMaps).addTo(map);
