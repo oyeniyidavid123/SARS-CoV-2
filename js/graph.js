@@ -32,225 +32,257 @@ let chartGroup = svg.append('g')
     .attr('transform', `translate(${chartMargins.left}, ${chartMargins.top})`);
 
 // read csv and draw
-let csvPath = '/data/data.csv';
-d3.csv(csvPath).then(csvData => {
-    // test to print data
-    console.log(csvData);
 
-    let factorsArray = ['healthcare', 'age', 'income', 'poverty', 'smokes', 'obesity'];
-    // nested forEach to convert column values to int
-    csvData.forEach(function(state) {
-        factorsArray.forEach(factor => {
-            state[`${factor}`] = +state[`${factor}`]
+let csvPathConfirmed = '/data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv',
+    csvPathDeaths = '/data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv',
+    csvPathRecovered = '/data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv'
+
+//promise that reads multiple csvs
+Promise.all([
+    d3.csv(csvPathConfirmed),
+    d3.csv(csvPathDeaths),
+    d3.csv(csvPathRecovered)
+])
+.then(csvData => {
+    // choose dataset based on selection of confirmed cases (0), deaths (1), recovered (2)
+    function initializeData(dataSet){
+        dateArray = [];
+    csvData[dataSet].columns.slice(4).forEach(date => {
+        dateArray.push(date);
+    });
+    
+    casesDate = '1/22/20';
+    // nested forEach to convert case values to int
+    csvData[dataSet].forEach(function(country) {
+        csvData[dataSet].columns.slice(4).forEach(date => {
+            country[`${date}`] = +country[`${date}`];
+            
         });
     });
-    
-    // set x scales for axes
-
-    let XScales = {};
-
-    factorsArray.slice(0, 3).forEach(factor => {
-        XScales[`${factor}`] = d3.scaleLinear()
-        .domain([0, d3.max(csvData, d => d[`${factor}`])])
-        .range([0, chartWidth]);
-
+    // create array of countries
+    countryArray = [];
+    csvData[dataSet].forEach(row =>{
+        //if country matches then create array of # of cases 
+        countryArray.push(row['Country/Region'])
     });
 
-    // set y scales for axes
-    let YScales = {};
+    csvData[dataSet].push(csvData[dataSet][0]); // add the first entry to the end to make a complete circle
 
-    factorsArray.slice(3, 7).forEach(factor => {
-        YScales[`${factor}`] = d3.scaleLinear()
-        .domain([0, d3.max(csvData, d => d[`${factor}`])])
-        .range([chartHeight, 0]);
+    // Set circle inner and outer radii
+    let innerRadius = 100,
+        outerRadius = d3.min([chartWidth, chartHeight])/1.5; // outer radius is scaled to the size of the height or 
+        //width of the svg, whichever is smaller
 
-    });
+    //set circle centers
+    let cxCenter = `${chartWidth/2 - 150}`,
+    cyCenter = `${chartWidth/2 - 210}`;
+
+    // set other circle values
+    circleRadians = 2 * Math.PI;
+
+    // set x scales for dates to angles in radians
+    let x = d3.scaleLinear()
+        .domain([0, csvData[dataSet].length])
+        .range([0, circleRadians]);
     
-    // create Axes
+    // set y scales according to the highest number of cases to radius
+    let y = d3.scaleRadial()
+        .domain([0, d3.max(csvData[dataSet], data => data['3/27/20'])])
+        .range([innerRadius, outerRadius]);
+
+    //configure line function for drawing line
+    let drawLine = d3.lineRadial()
+        .angle(function(d) {return x(csvData[dataSet].indexOf(d))})
+        .radius(function(d) {return y(d[`${casesDate}`])});
+
+    // add line as svg path using line function
+    radialLine = chartGroup.append('path')
+        .datum(csvData[dataSet])
+        .attr('fill', 'none')
+        .attr('stroke', '#4099ff')
+        .attr('stroke-width', '3')
+        .attr('d', drawLine)
+        .attr('id', 'dataLine')
+        .attr('transform', `translate(${cxCenter}, ${cyCenter})`);
+
+    // add center text to display date
+    let dateDisplay = chartGroup.append('text')
+        .text(`${casesDate}`)
+        .attr('text-anchor', 'middle')
+        .attr('alignment-baseline', 'central')
+        .attr('font-size', '30')
+        .attr('font-family', 'Verdana')
+        .attr('transform', `translate(${cxCenter}, ${cyCenter})`)
+
+
+    // Let's add tooltip creating function - fun for the whole family
+    //bisector function to find circle appearance index
+    let bisectFunction = d3.bisector(function(d) { return csvData[dataSet].indexOf(d); }).left;
+
+    // create svg group called focus to draw tooltip box
+    let focus = chartGroup.append("g")
+            .attr("class", "focus")
+            .style("display", "none");
+
+    // define circle marker properties
+    focus.append("circle")
+        .attr("r", 5)
+        .classed('circle-marker', true)
+
+    // define tooltip text box properties
+    focus.append("rect")
+        .attr("class", "tooltip")
+        .attr("width", 100)
+        .attr("height", 50)
+        .attr("x", 10)
+        .attr("y", -22)
+        .attr("rx", 4)
+        .attr("ry", 4);
+
+    // add svg text to tooltip box for country/region
+    focus.append("text")
+        .attr("class", "tooltip-country")
+        .attr("x", 18)
+        .attr("y", -2);
+
+    // add svg text for Province/State
+    focus.append("text")
+        .attr("class", "tooltip-province")
+        .attr("x", 18)
+        .attr("y", 18);
+
+    // add svg text to tooltip box for static cases text
+    focus.append("text")
+        .attr("x", 18)
+        .attr("y", 38)
+        .text("Cases: ");
+
+    // text for dynamic cases text
+    focus.append("text")
+        .attr("class", "tooltip-cases")
+        .attr("x", 65)
+        .attr("y", 38);
+
+    svg.append("rect")
+        .attr('id', 'toolTipHandler')
+        .attr('height', '800')
+        .attr("class", "overlay")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight)
+        .on("mouseover", function() { focus.style("display", null); })
+        .on("mouseout", function() { focus.style("display", "none"); })
+        .on("mousemove", mousemove);
     
-    let bottomAxisHealthcare = d3.axisBottom(XScales['healthcare']);
-    let bottomAxisAge = d3.axisBottom(XScales['age']);
-    let bottomAxisIncome = d3.axisBottom(XScales['income']);
 
-    let leftAxisPoverty = d3.axisLeft(YScales['poverty']);
-    let leftAxisSmokes = d3.axisLeft(YScales['smokes']);
-    let leftAxisObesity = d3.axisLeft(YScales['obesity']);
+    // handler function for moving tooltip with mouse    
+    function mousemove() {
+        let coords = d3.mouse(this);
+        let adjusted_x = coords[0] - cxCenter - innerRadius, //adjust cartesian coordinates to reference circle center
+            adjusted_y = -1 * (coords[1] - cyCenter - innerRadius);
 
-    //append axes to svg group
-    
-    //create bottom axis as one continuous group that can slide to different positions
-    let bottomAxisGroup = chartGroup.append('g');
+        angle_in_radians = -(Math.atan2( adjusted_y, adjusted_x) - Math.PI/2); // math do convert cartesian coordinates to radian angle from center
+        angle_in_radians = angle_in_radians > 0 ? angle_in_radians : (2*Math.PI) + angle_in_radians;
+        let r0 = x.invert(angle_in_radians), //use the x d3 scalar with .invert to convert mouse x coordiate to country index
+            i = bisectFunction(csvData[dataSet], r0, 1),
+            d0 = csvData[dataSet][i - 1], // array left of cursor
+            d1 = csvData[dataSet][i], // array of values right of cursor
+            d = r0 - d0 > d1 - r0 ? d1 : d0; //ternary operator to decide which data point to show
+        
+        // recalculate from radians to cartesian for where to place tooltip
+        let markerTheta = x(csvData[dataSet].indexOf(d)),
+            markerRadius = y(d[`${casesDate}`]);
+        let markerXTransform = (markerRadius * Math.cos(markerTheta - Math.PI/2)) + 0.5*cxCenter + innerRadius + 24;
+        let markerYTransform = (markerRadius * Math.sin(markerTheta - Math.PI/2)) + 0.5*cyCenter + innerRadius - 6;
+        
+        //adjust the tooltip according to the mouse pointer position
+        console.log(markerXTransform, markerYTransform);
+        focus.attr("transform", `translate(${markerXTransform}, ${markerYTransform})`);
+        focus.select(".tooltip-country").text(d['Country/Region']);
+        focus.select(".tooltip-province").text(d['Province/State']);
+        focus.select(".tooltip-cases").text(d[casesDate]);   
+    }
 
-    let bottomAxisPositions = {
-        healthcare : 0,
-        age : chartWidth +200,
-        income: -chartWidth -200
-    };
-    bottomAxisGroup.append('g')
-        .attr('transform', `translate(${bottomAxisPositions['healthcare']}, ${chartHeight})`)
-        .call(bottomAxisHealthcare);
 
-    bottomAxisGroup.append('g')
-        .attr('transform', `translate(${bottomAxisPositions['age']}, ${chartHeight})`)
-        .call(bottomAxisAge);
 
-    bottomAxisGroup.append('g')
-        .attr('transform', `translate(${bottomAxisPositions['income']}, ${chartHeight})`)
-        .call(bottomAxisIncome);
 
-    //left
+    //add selector for date
+    let dateDropdown = d3.select('#dataGraphDiv')
+        .insert("div",":first-child").classed('dropdown', true)
+            .attr('position', 'absolute')
+            .attr('top', '80px')
+        .append('button').classed('btn btn-primary dropdown-toggle', true)
+            .attr('id', 'dropdownDateDisplay')
+            .attr('type', 'button')
+            .attr('data-toggle', 'dropdown')
+            .attr('aria-haspopup', 'true')
+            .attr('aria-expanded', 'false')
+        .text(`${casesDate}`)
+        .append('div').classed('dropdown-menu scrollable', true).attr('aria-labelledby', 'dropdownMenuButton');
 
-    let leftAxisGroup = chartGroup.append('g');
-    let leftAxisPositions = {
-        poverty : 0,
-        smokes : chartHeight + 200,
-        obesity : -chartHeight - 200
-    };
+ 
+    //loop to add all the dates to dropdown
+    dateArray.forEach(date => {
+        
+        let dateSelection = dateDropdown.append('a')
+            .classed('dropdown-item', true)
+            .attr('id', `casesDate${date}`)
+            .attr('value', `${date}`)
+            .attr('href', '#')
+            .text(date);
 
-    leftAxisGroup.append('g')
-        .call(leftAxisPoverty);
-
-    leftAxisGroup.append('g')
-        .attr('transform', `translate(0, ${leftAxisPositions['smokes']})`)
-        .call(leftAxisSmokes);
-
-    leftAxisGroup.append('g')
-        .attr('transform', `translate(0, ${leftAxisPositions['obesity']})`)
-        .call(leftAxisObesity);
-
-    // BIG MONEY TIME MAKE THE CIRCLES
-    let stateCircles = chartGroup.selectAll('.stateCircle')
-        .data(csvData)
-        .enter()
-        .append('circle')
-        .classed('stateCircle', true)
-        .attr('cx', d => XScales['healthcare'](d['healthcare']))
-        .attr('cy', d => YScales['poverty'](d['poverty']))
-        .attr('r', '10');
-
-    // add circle text for each state
-    let stateLabels = chartGroup.selectAll('.stateText')
-        .data(csvData)
-        .enter()
-        .append('text')
-        .text(d => d.abbr)
-        .classed('stateText', true)
-        .attr('x', d => XScales['healthcare'](d['healthcare']))
-        .attr('y', d => YScales['poverty'](d['poverty']))
-        .attr('font-size', '10px');
-
-    //draw axis labels
-    // x axis labels
-    let xLabelObject = {};
-
-    xLabelObject['healthcare'] = chartGroup.append('text')
-        .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 50})`)
-        .classed('active', true)
-        .text('% of Households with Healthcare');
-    
-    xLabelObject['age'] = chartGroup.append('text')
-        .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 30})`)
-        .classed('inactive', true)
-        .text('Average Household Age');
-
-    xLabelObject['income'] = chartGroup.append('text')
-        .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 10})`)
-        .classed('inactive', true)
-        .text('Average Household Income');
-
-    // y axis labels
-
-    let yLabelObject = {};
-    yLabelObject['obesity'] = chartGroup.append('text')
-        .attr('transform', `translate(${chartMargins.left - 140}, ${chartHeight/2}) rotate(-90)`)
-        .classed('active', true)
-        .text('% of Households with an Obese Adult');
-
-    yLabelObject['poverty'] = chartGroup.append('text')
-        .attr('transform', `translate(${chartMargins.left - 160}, ${chartHeight/2}) rotate(-90)`)
-        .classed('inactive', true)
-        .text('% of Households in Poverty');
-
-    yLabelObject['smokes'] = chartGroup.append('text')
-        .attr('transform', `translate(${chartMargins.left - 180}, ${chartHeight/2}) rotate(-90)`)
-        .classed('inactive', true)
-        .text('% of Households with Smokers');
-
-    // Let's add tooltips - fun for the whole family
-    // create tooltip and call to svg chart area
-    let toolTip = d3.tip()
-        .attr('class', 'd3-tip')
-        .offset([120,80])
-        .html(function(d) {
-            return (`<p><strong>${d.state}</strong></p>
-            <p>${d.healthcare}% have healthcare</p>
-            <p>${d.poverty}% in poverty</p>`);
+        //listener to update based on date selection
+        dateSelection.on('click', function(){
+            let transitionDuration = 1000;
+            console.log(date)
+            casesDate = date; //update casesDate
+            //update the date displayed in the center
+            dateDisplay.transition()
+                .duration(transitionDuration/4)
+                .attr('opacity', 0)
+                .transition()
+                .text(`${date}`) 
+                .transition()
+                .duration(transitionDuration/4)
+                .attr('opacity', 1)
+                
+            // d3.select('#dropdownDateDisplay').text(`${date}`) //update the date displayed on the dropdown
+           
+            //reconfigure line drawing function
+            let drawLine = d3.lineRadial()
+                .angle(function(d) {return x(csvData[dataSet].indexOf(d))})
+                .radius(function(d) {return y(d[`${casesDate}`])});
+            //redraw line
+            radialLine
+                .transition()
+                .duration(transitionDuration)
+                .ease(d3.easeExp)
+                .attr('d', drawLine);
+            // update tooltips
+            d3.select('#toolTipHandler')
+            .on("mousemove", mousemove);
         });
-
-    chartGroup.call(toolTip);
-
-    // create listener for mouseover to show tooltips
-    stateLabels.on('mouseover', function(d){
-        toolTip.show(d, this);
-    })
-    .on('mouseout', function(d){
-        toolTip.hide(d);
-
     });
+    } //end of initializeData()
 
-    // create .on() listener for clicks on axes
-    Object.keys(xLabelObject).forEach(key => {
-        xLabelObject[`${key}`].on('click', function(){
+    initializeData(0);
 
-            //move all circle markers
-            stateCircles.transition()
-            .duration(500)
-            .attr('cx', d => XScales[`${key}`](d[`${key}`]));
+    function animateDraw(){
+        let lineLength = radialLine.node().getTotalLength();
+        radialLine
+            .attr('stroke-dasharray', lineLength + " " + lineLength) //set line to double length, with half being an empty dash
+            .transition().duration(800).ease(d3.easeExp)
+            .attr('stroke-dashoffset', lineLength) // set initial empty dash to be the visible part
+            .transition().duration(800).ease(d3.easeExp)
+            .attr('stroke-dashoffset', 0)
+            .transition()
+            .attr('stroke-dasharray', 'none');
+    }
+    animateDraw(); //draw the circle upon page load
 
-            //move all text labels
     
-            stateLabels.transition()
-            .duration(500)
-            .attr('x', d => XScales[`${key}`](d[`${key}`]));
-
-            // move axes on click
-            bottomAxisGroup.transition()
-            .duration(500)
-            .attr('transform', `translate(${bottomAxisPositions[key]}, 0)`);
-        
-    });
-
-    });
-    
-    // create .on() listener for clicks on Y axes
-    Object.keys(yLabelObject).forEach(key => {
-        yLabelObject[`${key}`].on('click', function(){
-
-            //move all circle markers
-            stateCircles.transition()
-            .duration(500)
-            .attr('cy', d => YScales[`${key}`](d[`${key}`]));
-
-            //move all text labels
-    
-            stateLabels.transition()
-            .duration(500)
-            .attr('y', d => YScales[`${key}`](d[`${key}`]))
-
-            // move axes on click
-            leftAxisGroup.transition()
-            .duration(500)
-            .attr('transform', `translate(0, ${leftAxisPositions[key]})`)
-        
-    });
-
-    });
-}
+} // promise end
     ).catch(function(error) {
         console.log(error);
     });
     
-// makeResponsive();
-// d3.select(window).on("resize", makeResponsive);
-
 

@@ -82,3 +82,54 @@ body {
   background: rgba(0, 0, 0, 0.8);
   border-radius: 4px;
 }
+
+/* tooltip stuff */
+.focus circle {
+  fill: steelblue;
+}
+
+.focus text {
+  font-size: 14px;
+}
+
+.tooltip {
+  fill: white;
+  stroke: #000;
+}
+
+.tooltip-date, .tooltip-likes {
+  font-weight: bold;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus circle {
+  fill: purple;
+}
+
+.focus text {
+  font-size: 14px;
+}
+
+.tooltip {
+  fill: white;
+  stroke: #000;
+}
+
+.tooltip-date, .tooltip-likes {
+  font-weight: bold;
+}
+
+/* scroll bar */
+.scrollable{
+  overflow: auto;
+  width: 200px; /* adjust this width depending to amount of text to display */
+  height: 400px; /* adjust height depending on number of options to display */
+  border: 1px silver solid;
+}
+.scrollable select{
+  border: none;
+}

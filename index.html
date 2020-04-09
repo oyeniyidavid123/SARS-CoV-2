@@ -15,6 +15,11 @@
   <!--d3 and d3 tooltips-->
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+
+  <!-- d3 ease functions -->
+  <script src="https://d3js.org/d3-ease.v1.min.js"></script>
+  <!-- radial scale function built on d3 -->
+  <script src="./js/d3-scale-radial.js"></script>
   
   <!--bootstrap-->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -139,17 +144,17 @@
     <!--------------------------------- Row 3 ---------------------------------------->
     
   
-    <!--------------------------------- Row 4 ---------------------------------------->
+    <!-------------------------Amos' Circle Graph ---------------------------------------->
     
     <div class="row">
         <div class="container-fluid">
             <div class="col-lg-12">
                 <div class="panel panel-default">
                   <div class="panel-heading">
-                      <div class="panel-body">
+                      <div class="panel-body" id='dataGraphDiv'>
                         <i class="fa fa-bar-chart-o fa-fw"></i> More Chart - Here
-                        <div id="#">
-                            <script type="text/javascript" src='#'></script>
+                        <div id="dataGraph">
+                            <script type="text/javascript" src='/js/graph.js'></script>
                       </div>
                   </div>
                 </div>
