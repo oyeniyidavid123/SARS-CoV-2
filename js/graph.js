@@ -64,6 +64,8 @@ Promise.all([
     // define tooltip text box properties
     focus.append("rect")
         .attr("class", "tooltip")
+        .attr('fill', 'white')
+        .attr('stroke', '#000')
         .attr("width", 100)
         .attr("height", 50)
         .attr("x", 10)
@@ -105,9 +107,10 @@ Promise.all([
     // create dropdown based on date
     let dateDropdown = d3.select('#dataGraphDiv')
         .insert("div",":first-child").classed('dropdown', true)
-            .attr('position', 'absolute')
-            .attr('top', '80px')
-        .append('button').classed('btn btn-primary dropdown-toggle', true)
+            // .attr('position', 'absolute')
+            // .attr('top', '80px')
+            // .classed('col-md-2', true);
+        .append('button').classed('btn btn-dark dropdown-toggle', true)
             .attr('id', 'dropdownDateDisplay')
             .attr('type', 'button')
             .attr('data-toggle', 'dropdown')
@@ -140,7 +143,7 @@ Promise.all([
 
         // Set circle inner and outer radii
         let innerRadius = 100,
-            outerRadius = d3.min([chartWidth, chartHeight])/1.5; // outer radius is scaled to the size of the height or 
+            outerRadius = d3.min([chartWidth, chartHeight])/1.8; // outer radius is scaled to the size of the height or 
             //width of the svg, whichever is smaller
 
         //set circle centers
@@ -177,13 +180,13 @@ Promise.all([
         // switch function to determine line stroke color
         switch(dataSet) {
             case 0:
-                radialLine.attr('stroke', '#4099ff')
+                radialLine.attr('stroke', '#d29d00')
                 break;
             case 1:
-                radialLine.attr('stroke', 'red')
+                radialLine.attr('stroke', '#bc2130')
                 break;
             case 2:
-                radialLine.attr('stroke', 'green')
+                radialLine.attr('stroke', '#1e7d33')
                 break;
         }
 
@@ -192,6 +195,7 @@ Promise.all([
             .attr('text-anchor', 'middle')
             .attr('alignment-baseline', 'central')
             .attr('font-size', '30')
+            .attr('font-weight', 'bold')
             .attr('font-family', 'Verdana')
             .attr('transform', `translate(${cxCenter}, ${cyCenter})`)
 
@@ -291,7 +295,7 @@ Promise.all([
         });
         }
 
-    initializeData(0); //initial settings for graph on page load
+    initializeData(1); //initial settings for graph on page load
     
 
 
