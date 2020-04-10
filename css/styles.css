@@ -9,6 +9,11 @@ body {
     font-size: 12px;
   }
   
+#countymap{
+    width: 600x;
+    height: 600px;
+    font-size: 12px;
+  }
 
 .active {
   font-weight: bold;
@@ -47,6 +52,12 @@ body {
   display: block;
   margin: 100;
 }
+.bar {
+  fill: rgb(28, 150, 180);
+}
+.bar:hover {
+  fill: rgb(161, 114, 92);
+}
 
 .d3-tip {
   padding: 6px;
@@ -58,6 +69,11 @@ body {
   text-transform: capitalize;
   background: rgba(0, 0, 0, 0.8);
   border-radius: 4px;
+}
+#dtGraph{
+    min-width: 600px;
+    min-height: 600px;
+    font-size: 10px;
 }
 
 #globalMap {
@@ -71,6 +87,8 @@ body {
     width: 600x;
     height: 600px;
   }
+
+
 /* scroll bar */
   .scrollable{
     overflow: auto;

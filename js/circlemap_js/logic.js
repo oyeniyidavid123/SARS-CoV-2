@@ -128,9 +128,9 @@ let overlayMaps = {
 
 const map = L.map("globalMap", {
   center: [
-    37.09, -95.71
+    31.65, -27.9375
   ],
-  zoom: 5,
+  zoom: 2,
   layers: [darkmap, countryLayer]
 });
 
